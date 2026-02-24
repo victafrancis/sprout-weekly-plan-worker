@@ -1,0 +1,8 @@
+# Agent Working Rules
+
+1. Read [`plan.md`](plan.md) first before proposing or implementing weekly-plan Lambda changes.
+2. Keep implementation aligned with [`architecture.md`](architecture.md).
+3. Preserve DynamoDB item key contracts (`PK`, `SK`) and 7-day log window behavior.
+4. Treat S3 prompt key `prompts/create-weekly-plan-prompt.md` as primary source with repository fallback.
+5. Keep model configurable through environment variables; do not hardcode provider model IDs.
+
