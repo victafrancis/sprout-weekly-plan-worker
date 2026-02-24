@@ -1,0 +1,1 @@
+{"ok":true,"service":"sprout-weekly-plan-worker","stage":"bootstrap","requestSource":"manual","requestedAt":"2026-02-24T21:42:22.966Z","timestamp":"2026-02-24T21:42:22.969Z","checks":{"region":true,"dynamoTable":true,"s3Bucket":true,"childId":true,"openrouterModel":true}}

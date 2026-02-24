@@ -1,0 +1,43 @@
+## 🧠 1. The Memory Bank
+**You are required to manage your own long-term memory.** At the start of *every* session, you must read the following files to understand the project state.
+
+### The Memory Files:
+1.  **`activeContext.md`** (Location: `.cline/activeContext.md`)
+    * **What:** The "Now". Tracks current task, recent changes, and immediate next steps.
+    * **Action:** Read this first. **Update this at the end of every session.**
+
+2.  **`contextArchive.md`** (Location: `.cline/contextArchive.md`)
+    * **What:** Historical session log and completed task context.
+    * **Action:** Append or migrate older, completed context here when `activeContext.md` grows or a task is fully complete.
+
+3.  **`architecture.md`** (Location: Root directory)
+    * **What:** The "Constitution". Contains the Split-Brain architecture, DynamoDB schema, and "Sprout" logic.
+    * **Action:** Read-Only. Refer to this for strict constraints. Do not modify unless we are fundamentally changing the architecture.
+
+### Your Workflow:
+1.  **Start:** Read `activeContext.md` to see where we left off.
+2.  **Consult:** Read `architecture.md` to ensure you aren't breaking the Single Table Design or Split-Brain rules.
+3.  **End:** Update memory files with hygiene rules:
+    * If work is still active, keep `activeContext.md` focused on the current objective, current status, blockers, and immediate next steps.
+    * If work is completed, move detailed session history into `contextArchive.md` and reset `activeContext.md` to concise current state.
+    * Keep `activeContext.md` short and fast to scan (target roughly one screen, not a long running log).
+
+
+### Next.js & Clean Code Principles
+**Goal:** The codebase must be understandable by a junior developer. Complexity is a failure.
+
+### Next.js 14+ Best Practices
+* **Server Components by Default:** All components are Server Components (`.tsx`) unless they explicitly need interactivity (hooks, event listeners). Only then add `'use client'`.
+* **Fetch in Components:** Do not use `useEffect` for data fetching. Fetch data directly in Server Components using `await`.
+* **API calls:** Always use try/catch for api calls and implement proper error handling.
+* **Reusability** Create reusable components and utility functions whenever possible when adding new features.
+
+### Readability Rules ("The Human Test")
+* **No "Magic" One-Liners:** Prefer verbose, clear logic over clever, dense one-liners.
+    * *Bad:* `const x = a ? b : c ? d : e;`
+    * *Good:* Use explicit `if/else` blocks for complex logic.
+* **Descriptive Naming:** Variable names must describe *what they contain*, not just types.
+    * *Bad:* `data`, `item`, `h`
+    * *Good:* `userProfile`, `dailyLogEntry`, `handleSubmit`
+* **Early Returns:** Avoid deep nesting (arrow code). Use guard clauses to exit functions early.
+* **Comments:** Comment *why* a complex piece of logic exists, not *what* the syntax is doing.

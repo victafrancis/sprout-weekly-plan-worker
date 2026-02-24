@@ -1,0 +1,59 @@
+name: Deploy Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGION: ${{ vars.REGION }}
+      LAMBDA_FUNCTION_NAME: ${{ vars.LAMBDA_FUNCTION_NAME }}
+      DYNAMODB_TABLE: ${{ vars.DYNAMODB_TABLE }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CHILD_ID: ${{ vars.CHILD_ID }}
+      OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+      S3_PROMPT_KEY: ${{ vars.S3_PROMPT_KEY }}
+      S3_DEVELOPMENT_GUIDES_PREFIX: ${{ vars.S3_DEVELOPMENT_GUIDES_PREFIX }}
+      S3_WEEKLY_PLANS_PREFIX: ${{ vars.S3_WEEKLY_PLANS_PREFIX }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package
+        run: npm run package
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Update function code
+        run: |
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --zip-file fileb://dist/lambda.zip \
+            --region "$REGION"
+
+      - name: Update function configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --region "$REGION" \
+            --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"
+
