@@ -60,6 +60,7 @@ Scope resources to the specific Lambda ARN whenever possible.
 Set secret:
 
 - `AWS_GITHUB_ACTIONS_ROLE_ARN` = deploy role ARN
+- `OPENROUTER_API_KEY` = OpenRouter API key (stored as secret, never as variable)
 
 Set repository variables used by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml):
 

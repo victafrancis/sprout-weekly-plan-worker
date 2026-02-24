@@ -19,6 +19,7 @@ jobs:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
       CHILD_ID: ${{ vars.CHILD_ID }}
       OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       S3_PROMPT_KEY: ${{ vars.S3_PROMPT_KEY }}
       S3_DEVELOPMENT_GUIDES_PREFIX: ${{ vars.S3_DEVELOPMENT_GUIDES_PREFIX }}
       S3_WEEKLY_PLANS_PREFIX: ${{ vars.S3_WEEKLY_PLANS_PREFIX }}
@@ -36,6 +37,20 @@ jobs:
 
       - name: Build and package
         run: npm run package
+
+      - name: Validate required deploy inputs
+        run: |
+          set -euo pipefail
+          test -n "$REGION"
+          test -n "$LAMBDA_FUNCTION_NAME"
+          test -n "$DYNAMODB_TABLE"
+          test -n "$S3_BUCKET"
+          test -n "$CHILD_ID"
+          test -n "$OPENROUTER_MODEL"
+          test -n "$OPENROUTER_API_KEY"
+          test -n "$S3_PROMPT_KEY"
+          test -n "$S3_DEVELOPMENT_GUIDES_PREFIX"
+          test -n "$S3_WEEKLY_PLANS_PREFIX"
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -55,5 +70,5 @@ jobs:
           aws lambda update-function-configuration \
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --region "$REGION" \
-            --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"
+            --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,OPENROUTER_API_KEY=$OPENROUTER_API_KEY,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"
 
