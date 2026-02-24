@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "esbuild src/handler.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/handler.mjs",
-    "package": "npm run build && powershell -NoProfile -Command \"if (!(Test-Path dist)) { throw 'dist folder missing' }; Compress-Archive -Path dist/handler.mjs -DestinationPath dist/lambda.zip -Force\"",
+    "package": "npm run build && bestzip dist/lambda.zip dist/handler.mjs",
     "invoke:local": "node -e \"import('./dist/handler.mjs').then(async m=>{const r=await m.handler({requestSource:'manual',requestedAt:new Date().toISOString()});console.log(JSON.stringify(r,null,2));}).catch(e=>{console.error(e);process.exit(1);})\"",
     "deploy:cli": "scripts\\deploy-lambda.cmd"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.13.10",
+    "bestzip": "^2.2.1",
     "esbuild": "^0.25.0",
     "typescript": "^5.8.2"
   }
