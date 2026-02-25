@@ -13,8 +13,9 @@ This repository contains the background worker for Sprout that generates a weekl
 
 ## Runtime packaging note
 
-- Lambda artifact now uses CommonJS bundle output `handler.cjs` to avoid ESM dynamic-require runtime failures with Smithy dependencies.
-- Lambda handler value should be `handler.cjs.handler`.
+- Lambda build uses CommonJS output `handler.cjs` locally.
+- Packaging copies that build to `handler.js` for Lambda zip compatibility.
+- Lambda handler value should be `handler.handler`.
 
 ## v1 scope
 
