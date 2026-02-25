@@ -10,11 +10,16 @@ type BuildPromptInput = {
   requestedAt: string
 }
 
+export type OpenRouterPromptMessages = {
+  systemPrompt: string
+  userPrompt: string
+}
+
 function formatJsonBlock(value: unknown): string {
   return JSON.stringify(value, null, 2)
 }
 
-export function buildOpenRouterPromptInput(input: BuildPromptInput): string {
+function buildRuntimeContextSections(input: BuildPromptInput): string {
   const contextEnvelope = {
     childId: input.childId,
     requestSource: input.requestSource,
@@ -25,10 +30,6 @@ export function buildOpenRouterPromptInput(input: BuildPromptInput): string {
   }
 
   const sections: string[] = []
-  sections.push(input.promptTemplate.trim())
-  sections.push('')
-  sections.push('---')
-  sections.push('')
   sections.push('## Runtime Context')
   sections.push(formatJsonBlock(contextEnvelope))
   sections.push('')
@@ -49,6 +50,27 @@ export function buildOpenRouterPromptInput(input: BuildPromptInput): string {
   sections.push('- Return markdown only.')
   sections.push('- Follow the exact required headers from the template.')
   sections.push('- Keep guidance practical, concise, and parent-friendly.')
+
+  return sections.join('\n').trim()
+}
+
+export function buildOpenRouterPromptMessages(input: BuildPromptInput): OpenRouterPromptMessages {
+  const systemPrompt = input.promptTemplate.trim()
+  const userPrompt = buildRuntimeContextSections(input)
+
+  return {
+    systemPrompt,
+    userPrompt,
+  }
+}
+
+export function buildOpenRouterPromptInput(input: BuildPromptInput): string {
+  const sections: string[] = []
+  sections.push(input.promptTemplate.trim())
+  sections.push('')
+  sections.push('---')
+  sections.push('')
+  sections.push(buildRuntimeContextSections(input))
 
   return sections.join('\n').trim()
 }

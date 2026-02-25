@@ -1,6 +1,6 @@
 import type { Handler } from 'aws-lambda'
 
-import { buildOpenRouterPromptInput } from './prompt-context.js'
+import { buildOpenRouterPromptMessages } from './prompt-context.js'
 import { readWorkerConfig } from './worker-config.js'
 import { fetchLogsForWindow, fetchProfileItem } from './worker-dynamodb.js'
 import { generateWeeklyPlanMarkdown } from './worker-openrouter.js'
@@ -40,7 +40,7 @@ export const handler: Handler<WorkerInputEvent, WorkerOutput> = async (event) =>
       promptKey: config.s3PromptKey,
     })
 
-    const modelPromptInput = buildOpenRouterPromptInput({
+    const modelPromptMessages = buildOpenRouterPromptMessages({
       promptTemplate,
       childId: config.childId,
       profileItem,
@@ -53,7 +53,8 @@ export const handler: Handler<WorkerInputEvent, WorkerOutput> = async (event) =>
     const generatedMarkdown = await generateWeeklyPlanMarkdown({
       apiKey: config.openRouterApiKey,
       model: config.openRouterModel,
-      prompt: modelPromptInput,
+      systemPrompt: modelPromptMessages.systemPrompt,
+      userPrompt: modelPromptMessages.userPrompt,
     })
 
     const outputObjectKey = await writeWeeklyPlanArtifact({

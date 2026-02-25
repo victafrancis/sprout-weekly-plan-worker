@@ -58,6 +58,7 @@ function normalizeObjectPrefix(prefix: string): string {
 
 export async function loadPromptTemplateMarkdown(input: LoadPromptInput): Promise<string> {
   let remotePromptMarkdown: string | null = null
+  let promptSource: 's3' | 'local-fallback' = 's3'
 
   try {
     remotePromptMarkdown = await readObjectAsText({
@@ -65,14 +66,31 @@ export async function loadPromptTemplateMarkdown(input: LoadPromptInput): Promis
       bucketName: input.bucketName,
       objectKey: input.promptKey,
     })
-  } catch {
+  } catch (error) {
     remotePromptMarkdown = null
+    promptSource = 'local-fallback'
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown S3 prompt load error'
+    console.warn('[weekly-plan-worker] Failed to load prompt from S3, falling back to local prompt template', {
+      bucketName: input.bucketName,
+      promptKey: input.promptKey,
+      errorMessage,
+    })
   }
 
-  return resolvePromptTemplate({
+  const resolvedPromptTemplate = resolvePromptTemplate({
     remotePromptMarkdown,
     fallbackPromptMarkdown: localPromptTemplate,
   })
+
+  console.info('[weekly-plan-worker] Prompt template resolved', {
+    promptSource,
+    bucketName: input.bucketName,
+    promptKey: input.promptKey,
+    resolvedPromptCharacters: resolvedPromptTemplate.length,
+  })
+
+  return resolvedPromptTemplate
 }
 
 export async function loadDevelopmentGuidesMarkdown(input: LoadGuidesInput): Promise<string[]> {

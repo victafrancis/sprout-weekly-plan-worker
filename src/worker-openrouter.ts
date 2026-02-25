@@ -3,7 +3,8 @@ import { validateWeeklyPlanMarkdown } from './markdown-validation.js'
 type GenerateInput = {
   apiKey: string
   model: string
-  prompt: string
+  systemPrompt: string
+  userPrompt: string
 }
 
 type OpenRouterResponse = {
@@ -54,8 +55,12 @@ export async function generateWeeklyPlanMarkdown(input: GenerateInput): Promise<
       temperature: 0.2,
       messages: [
         {
+          role: 'system',
+          content: input.systemPrompt,
+        },
+        {
           role: 'user',
-          content: input.prompt,
+          content: input.userPrompt,
         },
       ],
     }),
