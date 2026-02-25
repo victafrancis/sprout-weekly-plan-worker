@@ -181,17 +181,21 @@ Cons
   - retry logic for configuration updates,
   - post-deploy status verification.
 - ✅ Environment parity improved between CLI and CI paths, including `OPENROUTER_API_KEY` wiring.
-- ✅ Packaging corrected so Lambda zip contains `handler.mjs` at archive root.
+- ✅ Weekly-plan generation runtime replaced bootstrap health handler in Lambda code.
+- ✅ Packaging stabilized for Lambda runtime compatibility:
+  - build emits CommonJS `handler.cjs` locally,
+  - package step creates `handler.js` at zip root,
+  - Lambda handler value standardized as `handler.handler`.
+- ✅ Post-fix deployment validated after resolving:
+  - `Dynamic require of "buffer" is not supported`,
+  - `Runtime.HandlerNotFound` from handler-path mismatch,
+  - cross-platform CI packaging issue (`copy: not found`).
 
 ### Remaining Work (Next Steps)
 
-1. Replace bootstrap health handler with full weekly-plan generation flow.
-2. Implement DynamoDB reads (profile + last 7 days logs) in Lambda runtime code.
-3. Implement S3 prompt loading (primary S3 key + local file fallback).
-4. Implement OpenRouter call and markdown schema/header validation.
-5. Write generated markdown artifact to `plans/<childId>/<timestamp>.md`.
-6. Add integration-level smoke test that confirms object creation in S3 after deploy.
-7. Keep CI on `main` as primary deployment path; keep CLI only as fallback.
+1. Add integration-level smoke test that confirms object creation in S3 after deploy.
+2. Add an automated post-deploy invoke/check step in CI (optional but recommended).
+3. Keep CI on `main` as primary deployment path; keep CLI only as break-glass fallback.
 
 ## Detailed Step by Step Execution Checklist
 
@@ -249,13 +253,13 @@ Status: ✅ Completed (OIDC configured, workflow green after IAM and race-condit
 
 ### Phase 3 Promotion and Operating Model
 
-Status: 🟡 In progress
+Status: ✅ Completed
 
-1. Keep AWS CLI script as emergency fallback while CI stabilizes.
-2. Use feature branches and PRs for every change.
-3. Allow production deploy only through merge to `main`.
-4. Require green CI checks before merge.
-5. After two or more successful CI deploys, treat GitHub Actions as primary deploy path.
+1. ✅ Keep AWS CLI script as emergency fallback while CI stabilizes.
+2. ✅ Use feature branches and PRs for every change.
+3. ✅ Allow production deploy only through merge to `main`.
+4. ✅ Require green CI checks before merge.
+5. ✅ Treat GitHub Actions as primary deploy path.
 
 ### Code Mode Task Order
 
