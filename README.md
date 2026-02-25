@@ -27,10 +27,10 @@ This repository contains the background worker for Sprout that generates a weekl
 
 ## Deployment approach
 
-1. Validate quickly with AWS CLI deploy/update flow.
-2. Add GitHub Actions auto-deploy on push to `main` using AWS OIDC.
+1. **Primary path:** GitHub Actions deploy on push to `main` via OIDC in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+2. **Break-glass fallback:** CLI deploy script in [`scripts/deploy-lambda.cmd`](scripts/deploy-lambda.cmd) for emergency recovery only.
 
-## Quickstart (CLI-first)
+## Local development verification
 
 ### 1) Install dependencies
 
@@ -44,7 +44,21 @@ npm install
 npm run package
 ```
 
-### 3) Set required environment variables (Windows `cmd.exe`)
+### 3) Run focused local tests
+
+```bash
+npm run test
+```
+
+### 4) Run local fixture flow (no AWS calls)
+
+```bash
+npm run run:local
+```
+
+## Break-glass CLI deployment (emergency only)
+
+### 1) Set required environment variables (Windows `cmd.exe`)
 
 ```cmd
 set REGION=us-east-1
@@ -60,13 +74,13 @@ set S3_DEVELOPMENT_GUIDES_PREFIX=development_guides/
 set S3_WEEKLY_PLANS_PREFIX=plans/
 ```
 
-### 4) Deploy with AWS CLI
+### 2) Deploy with AWS CLI
 
 ```cmd
 npm run deploy:cli
 ```
 
-### 5) Invoke health-check handler
+### 3) Invoke Lambda and inspect output
 
 ```cmd
 aws lambda invoke --function-name %LAMBDA_FUNCTION_NAME% --payload "{}" --cli-binary-format raw-in-base64-out --region %REGION% out.json && type out.json

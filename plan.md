@@ -40,7 +40,9 @@ Build a background worker that assembles child profile context plus last 7 days 
   raw_text: string,
   key_takeaways: string[],
   sentiment: "positive" | "neutral" | "mixed" | "frustrated",
-  ...additionalProperties
+  plan_reference: {
+    referenceContentMarkdown: string
+  }
 }
 ```
 
@@ -95,7 +97,7 @@ Build a background worker that assembles child profile context plus last 7 days 
 2. Query logs by partition `LOG#<CHILD_ID>`
 3. Filter logs to last 7 days based on `SK` date suffix
 4. Sort ascending by date
-5. Include all fields present in each log item when constructing model context
+5. Include recommended fields only present in each log item when constructing model context (from `Daily Log Item Shape` above)
 6. Load development guide docs from `S3_DEVELOPMENT_GUIDES_PREFIX`
 7. Load prompt from `S3_PROMPT_KEY` fallback to local file
 8. Build final model input with profile plus logs plus guides
@@ -113,7 +115,7 @@ Build a background worker that assembles child profile context plus last 7 days 
 - `S3_DEVELOPMENT_GUIDES_PREFIX`
 - `S3_PROMPT_KEY`
 - `S3_WEEKLY_PLANS_PREFIX`
-- `AWS_REGION`
+- `REGION`
 
 ## Local Testing Plan
 
@@ -167,6 +169,30 @@ Cons
 2. Move to GitHub Actions with OIDC as soon as Lambda behavior is stable
 3. Keep both paths available temporarily until CI is trusted
 
+## Current Delivery Status (Updated)
+
+### Completed
+
+- ✅ CLI deployment path validated end-to-end (`build -> package -> deploy -> invoke`).
+- ✅ GitHub Actions OIDC deployment path validated on push to `main`.
+- ✅ Workflow now includes:
+  - required input preflight checks,
+  - Lambda update wait steps,
+  - retry logic for configuration updates,
+  - post-deploy status verification.
+- ✅ Environment parity improved between CLI and CI paths, including `OPENROUTER_API_KEY` wiring.
+- ✅ Packaging corrected so Lambda zip contains `handler.mjs` at archive root.
+
+### Remaining Work (Next Steps)
+
+1. Replace bootstrap health handler with full weekly-plan generation flow.
+2. Implement DynamoDB reads (profile + last 7 days logs) in Lambda runtime code.
+3. Implement S3 prompt loading (primary S3 key + local file fallback).
+4. Implement OpenRouter call and markdown schema/header validation.
+5. Write generated markdown artifact to `plans/<childId>/<timestamp>.md`.
+6. Add integration-level smoke test that confirms object creation in S3 after deploy.
+7. Keep CI on `main` as primary deployment path; keep CLI only as fallback.
+
 ## Detailed Step by Step Execution Checklist
 
 ### Phase 0 Repository Bootstrap
@@ -177,6 +203,8 @@ Cons
 4. Enable branch protection on `main` with at least one review before merge.
 
 ### Phase 1 Lambda Build and AWS CLI Deployment Validation
+
+Status: ✅ Completed (bootstrap implementation + successful deploy/invoke validation)
 
 1. Scaffold Lambda TypeScript project structure with `src/`, `scripts/`, `tests/fixtures/`.
 2. Add build tooling for single-file Lambda bundle targeting Node.js 22.
@@ -203,6 +231,8 @@ Cons
 
 ### Phase 2 GitHub Actions Auto Deploy on Main
 
+Status: ✅ Completed (OIDC configured, workflow green after IAM and race-condition hardening)
+
 1. Create AWS IAM role for GitHub OIDC trust scoped to this repository.
 2. Grant minimum permissions for Lambda update, configuration update, and optional read checks.
 3. Add GitHub Actions workflow triggered on push to `main`.
@@ -218,6 +248,8 @@ Cons
 6. Merge a small test change to confirm auto deploy path is healthy.
 
 ### Phase 3 Promotion and Operating Model
+
+Status: 🟡 In progress
 
 1. Keep AWS CLI script as emergency fallback while CI stabilizes.
 2. Use feature branches and PRs for every change.

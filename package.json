@@ -4,16 +4,24 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild src/handler.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/handler.mjs",
+    "build": "esbuild src/handler.ts --bundle --platform=node --target=node22 --format=esm --loader:.md=text --outfile=dist/handler.mjs",
     "package": "npm run build && cd dist && bestzip lambda.zip handler.mjs",
     "invoke:local": "node -e \"import('./dist/handler.mjs').then(async m=>{const r=await m.handler({requestSource:'manual',requestedAt:new Date().toISOString()});console.log(JSON.stringify(r,null,2));}).catch(e=>{console.error(e);process.exit(1);})\"",
-    "deploy:cli": "scripts\\deploy-lambda.cmd"
+    "deploy:cli": "scripts\\deploy-lambda.cmd",
+    "run:local": "tsx src/local-runner.ts",
+    "test": "tsx --test tests/worker-dynamodb.test.ts tests/markdown-validation.test.ts tests/prompt-fallback.test.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.883.0",
+    "@aws-sdk/client-s3": "^3.883.0",
+    "@aws-sdk/lib-dynamodb": "^3.883.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^22.13.10",
     "bestzip": "^2.2.1",
     "esbuild": "^0.25.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }
 }
