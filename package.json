@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "esbuild src/handler.ts --bundle --platform=node --target=node22 --format=cjs --loader:.md=text --outfile=dist/handler.cjs",
-    "package": "npm run build && cd dist && bestzip lambda.zip handler.cjs",
+    "package": "npm run build && copy /Y dist\\handler.cjs dist\\handler.js && cd dist && bestzip lambda.zip handler.js",
     "invoke:local": "node -e \"const m=require('./dist/handler.cjs');Promise.resolve(m.handler({requestSource:'manual',requestedAt:new Date().toISOString()})).then(r=>{console.log(JSON.stringify(r,null,2));}).catch(e=>{console.error(e);process.exit(1);});\"",
     "deploy:cli": "scripts\\deploy-lambda.cmd",
     "run:local": "tsx src/local-runner.ts",
