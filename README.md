@@ -11,6 +11,11 @@ This repository contains the background worker for Sprout that generates a weekl
 - Validates the markdown output shape.
 - Writes the generated weekly plan artifact to S3 under `plans/<childId>/<timestamp>.md`.
 
+## Runtime packaging note
+
+- Lambda artifact now uses CommonJS bundle output `handler.cjs` to avoid ESM dynamic-require runtime failures with Smithy dependencies.
+- Lambda handler value should be `handler.cjs.handler`.
+
 ## v1 scope
 
 - Runtime: TypeScript on AWS Lambda `nodejs22.x`

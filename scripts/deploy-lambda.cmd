@@ -33,7 +33,7 @@ if errorlevel 1 (
   aws lambda create-function ^
     --function-name "%LAMBDA_FUNCTION_NAME%" ^
     --runtime nodejs22.x ^
-    --handler handler.handler ^
+    --handler handler.cjs.handler ^
     --architectures x86_64 ^
     --role "%LAMBDA_ROLE_ARN%" ^
     --zip-file fileb://%ZIP_FILE% ^
@@ -54,6 +54,7 @@ echo [INFO] Updating function environment variables...
 aws lambda update-function-configuration ^
   --function-name "%LAMBDA_FUNCTION_NAME%" ^
   --region "%REGION%" ^
+  --handler "handler.cjs.handler" ^
   --environment "Variables={REGION=%REGION%,DYNAMODB_TABLE=%DYNAMODB_TABLE%,S3_BUCKET=%S3_BUCKET%,CHILD_ID=%CHILD_ID%,OPENROUTER_MODEL=%OPENROUTER_MODEL%,OPENROUTER_API_KEY=%OPENROUTER_API_KEY%,S3_PROMPT_KEY=%S3_PROMPT_KEY%,S3_DEVELOPMENT_GUIDES_PREFIX=%S3_DEVELOPMENT_GUIDES_PREFIX%,S3_WEEKLY_PLANS_PREFIX=%S3_WEEKLY_PLANS_PREFIX%}"
 
 if errorlevel 1 exit /b 1

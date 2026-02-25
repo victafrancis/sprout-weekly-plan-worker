@@ -79,6 +79,7 @@ jobs:
             if aws lambda update-function-configuration \
               --function-name "$LAMBDA_FUNCTION_NAME" \
               --region "$REGION" \
+              --handler "handler.cjs.handler" \
               --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,OPENROUTER_API_KEY=$OPENROUTER_API_KEY,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"; then
               echo "Configuration update succeeded"
               break
