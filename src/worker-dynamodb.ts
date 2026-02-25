@@ -29,11 +29,17 @@ function extractDateFromSortKey(sortKey: string): string | null {
 
   const datePart = sortKey.slice('DATE#'.length)
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
-    return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    return datePart
   }
 
-  return datePart
+  const timestampDatePrefix = datePart.slice(0, 10)
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(timestampDatePrefix)) {
+    return timestampDatePrefix
+  }
+
+  return null
 }
 
 function toDateAtUtcMidnight(dateText: string): Date {
@@ -44,21 +50,30 @@ function toIsoDate(dateValue: Date): string {
   return dateValue.toISOString().slice(0, 10)
 }
 
+function getRollingWindowBounds(nowIso: string, logWindowDays: number): { startDateText: string; endDateText: string } {
+  const nowDate = new Date(nowIso)
+
+  if (Number.isNaN(nowDate.getTime())) {
+    throw new Error(`Invalid nowIso timestamp: ${nowIso}`)
+  }
+
+  const endDateText = toIsoDate(nowDate)
+  const startDate = new Date(nowDate.getTime())
+  startDate.setUTCDate(startDate.getUTCDate() - (logWindowDays - 1))
+  const startDateText = toIsoDate(startDate)
+
+  return {
+    startDateText,
+    endDateText,
+  }
+}
+
 export function selectLogsForRollingWindow(input: {
   logs: DailyLogItem[]
   nowIso: string
   logWindowDays: number
 }): DailyLogItem[] {
-  const nowDate = new Date(input.nowIso)
-
-  if (Number.isNaN(nowDate.getTime())) {
-    throw new Error(`Invalid nowIso timestamp: ${input.nowIso}`)
-  }
-
-  const endDateText = toIsoDate(nowDate)
-  const startDate = new Date(nowDate.getTime())
-  startDate.setUTCDate(startDate.getUTCDate() - (input.logWindowDays - 1))
-  const startDateText = toIsoDate(startDate)
+  const { startDateText, endDateText } = getRollingWindowBounds(input.nowIso, input.logWindowDays)
 
   const logsInsideWindow: DailyLogItem[] = []
 
@@ -121,6 +136,7 @@ export async function fetchProfileItem(input: FetchProfileInput): Promise<ChildP
 export async function fetchLogsForWindow(input: FetchLogsInput): Promise<DailyLogItem[]> {
   const documentClient = createDocumentClient(input.region)
   const logsPartitionKey = `LOG#${input.childId}`
+  const { startDateText, endDateText } = getRollingWindowBounds(input.nowIso, input.logWindowDays)
 
   const logQueryResult = await documentClient.send(
     new QueryCommand({
@@ -133,11 +149,38 @@ export async function fetchLogsForWindow(input: FetchLogsInput): Promise<DailyLo
   )
 
   const allChildLogs = (logQueryResult.Items ?? []) as DailyLogItem[]
-
-  return selectLogsForRollingWindow({
+  const selectedLogs = selectLogsForRollingWindow({
     logs: allChildLogs,
     nowIso: input.nowIso,
     logWindowDays: input.logWindowDays,
   })
+
+  const selectedLogDates: string[] = []
+
+  for (const logItem of selectedLogs) {
+    const logDateText = extractDateFromSortKey(logItem.SK)
+
+    if (!logDateText) {
+      continue
+    }
+
+    selectedLogDates.push(logDateText)
+  }
+
+  console.info(
+    JSON.stringify({
+      event: 'weekly-plan.logs-window',
+      childId: input.childId,
+      nowIso: input.nowIso,
+      logWindowDays: input.logWindowDays,
+      windowStartDate: startDateText,
+      windowEndDate: endDateText,
+      queriedLogsCount: allChildLogs.length,
+      selectedLogsCount: selectedLogs.length,
+      selectedLogDates,
+    }),
+  )
+
+  return selectedLogs
 }
 

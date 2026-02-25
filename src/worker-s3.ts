@@ -1,4 +1,5 @@
 import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { createHash } from 'node:crypto'
 
 import localPromptTemplate from '../create-weekly-plan-prompt.md'
 import { resolvePromptTemplate } from './prompt-fallback.js'
@@ -56,6 +57,10 @@ function normalizeObjectPrefix(prefix: string): string {
   return `${prefix}/`
 }
 
+function hashText(value: string): string {
+  return createHash('sha256').update(value, 'utf8').digest('hex')
+}
+
 export async function loadPromptTemplateMarkdown(input: LoadPromptInput): Promise<string> {
   let remotePromptMarkdown: string | null = null
   let promptSource: 's3' | 'local-fallback' = 's3'
@@ -71,11 +76,14 @@ export async function loadPromptTemplateMarkdown(input: LoadPromptInput): Promis
     promptSource = 'local-fallback'
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown S3 prompt load error'
-    console.warn('[weekly-plan-worker] Failed to load prompt from S3, falling back to local prompt template', {
-      bucketName: input.bucketName,
-      promptKey: input.promptKey,
-      errorMessage,
-    })
+    console.warn(
+      JSON.stringify({
+        event: 'weekly-plan.prompt-fallback',
+        bucketName: input.bucketName,
+        promptKey: input.promptKey,
+        errorMessage,
+      }),
+    )
   }
 
   const resolvedPromptTemplate = resolvePromptTemplate({
@@ -83,12 +91,17 @@ export async function loadPromptTemplateMarkdown(input: LoadPromptInput): Promis
     fallbackPromptMarkdown: localPromptTemplate,
   })
 
-  console.info('[weekly-plan-worker] Prompt template resolved', {
-    promptSource,
-    bucketName: input.bucketName,
-    promptKey: input.promptKey,
-    resolvedPromptCharacters: resolvedPromptTemplate.length,
-  })
+  console.info(
+    JSON.stringify({
+      event: 'weekly-plan.prompt-resolved',
+      promptSource,
+      bucketName: input.bucketName,
+      promptKey: input.promptKey,
+      resolvedPromptCharacters: resolvedPromptTemplate.length,
+      resolvedPromptSha256: hashText(resolvedPromptTemplate),
+      resolvedPromptFirstLine: resolvedPromptTemplate.split('\n')[0]?.trim() ?? '',
+    }),
+  )
 
   return resolvedPromptTemplate
 }

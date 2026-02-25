@@ -1,4 +1,5 @@
 import type { Handler } from 'aws-lambda'
+import { createHash } from 'node:crypto'
 
 import { buildOpenRouterPromptMessages } from './prompt-context.js'
 import { readWorkerConfig } from './worker-config.js'
@@ -6,6 +7,10 @@ import { fetchLogsForWindow, fetchProfileItem } from './worker-dynamodb.js'
 import { generateWeeklyPlanMarkdown } from './worker-openrouter.js'
 import { loadDevelopmentGuidesMarkdown, loadPromptTemplateMarkdown, writeWeeklyPlanArtifact } from './worker-s3.js'
 import type { WorkerInputEvent, WorkerOutput } from './worker-types.js'
+
+function hashText(value: string): string {
+  return createHash('sha256').update(value, 'utf8').digest('hex')
+}
 
 export const handler: Handler<WorkerInputEvent, WorkerOutput> = async (event) => {
   const safeEvent = event ?? {}
@@ -49,6 +54,22 @@ export const handler: Handler<WorkerInputEvent, WorkerOutput> = async (event) =>
       requestSource: safeEvent.requestSource ?? 'manual',
       requestedAt: requestTimestamp,
     })
+
+    console.info(
+      JSON.stringify({
+        event: 'weekly-plan.model-input-summary',
+        childId: config.childId,
+        requestSource: safeEvent.requestSource ?? 'manual',
+        requestedAt: requestTimestamp,
+        logsCount: recentLogs.length,
+        guidesCount: developmentGuides.length,
+        systemPromptCharacters: modelPromptMessages.systemPrompt.length,
+        userPromptCharacters: modelPromptMessages.userPrompt.length,
+        systemPromptSha256: hashText(modelPromptMessages.systemPrompt),
+        userPromptSha256: hashText(modelPromptMessages.userPrompt),
+        systemPromptFirstLine: modelPromptMessages.systemPrompt.split('\n')[0]?.trim() ?? '',
+      }),
+    )
 
     const generatedMarkdown = await generateWeeklyPlanMarkdown({
       apiKey: config.openRouterApiKey,
