@@ -65,10 +65,44 @@ jobs:
             --zip-file fileb://dist/lambda.zip \
             --region "$REGION"
 
+      - name: Wait for code update to finish
+        run: |
+          aws lambda wait function-updated \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --region "$REGION"
+
       - name: Update function configuration
         run: |
-          aws lambda update-function-configuration \
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            echo "Attempt $attempt: updating Lambda configuration"
+            if aws lambda update-function-configuration \
+              --function-name "$LAMBDA_FUNCTION_NAME" \
+              --region "$REGION" \
+              --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,OPENROUTER_API_KEY=$OPENROUTER_API_KEY,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"; then
+              echo "Configuration update succeeded"
+              break
+            fi
+
+            if [ "$attempt" -eq 5 ]; then
+              echo "Configuration update failed after retries"
+              exit 1
+            fi
+
+            echo "Configuration update conflicted; waiting before retry"
+            sleep 8
+          done
+
+      - name: Wait for configuration update to finish
+        run: |
+          aws lambda wait function-updated \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --region "$REGION"
+
+      - name: Verify function update status
+        run: |
+          aws lambda get-function-configuration \
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --region "$REGION" \
-            --environment "Variables={REGION=$REGION,DYNAMODB_TABLE=$DYNAMODB_TABLE,S3_BUCKET=$S3_BUCKET,CHILD_ID=$CHILD_ID,OPENROUTER_MODEL=$OPENROUTER_MODEL,OPENROUTER_API_KEY=$OPENROUTER_API_KEY,S3_PROMPT_KEY=$S3_PROMPT_KEY,S3_DEVELOPMENT_GUIDES_PREFIX=$S3_DEVELOPMENT_GUIDES_PREFIX,S3_WEEKLY_PLANS_PREFIX=$S3_WEEKLY_PLANS_PREFIX}"
+            --query '{LastUpdateStatus:LastUpdateStatus,LastUpdateStatusReason:LastUpdateStatusReason,RevisionId:RevisionId}'
 

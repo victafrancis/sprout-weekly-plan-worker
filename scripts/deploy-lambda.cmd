@@ -11,6 +11,11 @@ if "%LAMBDA_FUNCTION_NAME%"=="" (
   exit /b 1
 )
 
+if "%OPENROUTER_API_KEY%"=="" (
+  echo [ERROR] OPENROUTER_API_KEY is required
+  exit /b 1
+)
+
 if "%LAMBDA_ROLE_ARN%"=="" (
   echo [ERROR] LAMBDA_ROLE_ARN is required for first-time create
   echo [INFO] If the function already exists, this value can be reused safely.
@@ -49,7 +54,7 @@ echo [INFO] Updating function environment variables...
 aws lambda update-function-configuration ^
   --function-name "%LAMBDA_FUNCTION_NAME%" ^
   --region "%REGION%" ^
-  --environment "Variables={REGION=%REGION%,DYNAMODB_TABLE=%DYNAMODB_TABLE%,S3_BUCKET=%S3_BUCKET%,CHILD_ID=%CHILD_ID%,OPENROUTER_MODEL=%OPENROUTER_MODEL%,S3_PROMPT_KEY=%S3_PROMPT_KEY%,S3_DEVELOPMENT_GUIDES_PREFIX=%S3_DEVELOPMENT_GUIDES_PREFIX%,S3_WEEKLY_PLANS_PREFIX=%S3_WEEKLY_PLANS_PREFIX%}"
+  --environment "Variables={REGION=%REGION%,DYNAMODB_TABLE=%DYNAMODB_TABLE%,S3_BUCKET=%S3_BUCKET%,CHILD_ID=%CHILD_ID%,OPENROUTER_MODEL=%OPENROUTER_MODEL%,OPENROUTER_API_KEY=%OPENROUTER_API_KEY%,S3_PROMPT_KEY=%S3_PROMPT_KEY%,S3_DEVELOPMENT_GUIDES_PREFIX=%S3_DEVELOPMENT_GUIDES_PREFIX%,S3_WEEKLY_PLANS_PREFIX=%S3_WEEKLY_PLANS_PREFIX%}"
 
 if errorlevel 1 exit /b 1
 

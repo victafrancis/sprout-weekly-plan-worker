@@ -54,6 +54,7 @@ set DYNAMODB_TABLE=Sprout_Data
 set S3_BUCKET=sprout-knowledge-base
 set CHILD_ID=Bambam
 set OPENROUTER_MODEL=google/gemini-3.1-pro-preview
+set OPENROUTER_API_KEY=<your-openrouter-api-key>
 set S3_PROMPT_KEY=prompts/create-weekly-plan-prompt.md
 set S3_DEVELOPMENT_GUIDES_PREFIX=development_guides/
 set S3_WEEKLY_PLANS_PREFIX=plans/
