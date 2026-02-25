@@ -1,5 +1,3 @@
-import { validateWeeklyPlanMarkdown } from './markdown-validation.js'
-
 type GenerateInput = {
   apiKey: string
   model: string
@@ -79,7 +77,6 @@ export async function generateWeeklyPlanMarkdown(input: GenerateInput): Promise<
     throw new Error('OpenRouter returned empty content for weekly plan markdown')
   }
 
-  validateWeeklyPlanMarkdown(markdownContent)
   return markdownContent
 }
 

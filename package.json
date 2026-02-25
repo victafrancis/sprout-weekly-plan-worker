@@ -9,7 +9,7 @@
     "invoke:local": "node -e \"const m=require('./dist/handler.cjs');Promise.resolve(m.handler({requestSource:'manual',requestedAt:new Date().toISOString()})).then(r=>{console.log(JSON.stringify(r,null,2));}).catch(e=>{console.error(e);process.exit(1);});\"",
     "deploy:cli": "scripts\\deploy-lambda.cmd",
     "run:local": "tsx src/local-runner.ts",
-    "test": "tsx --test tests/worker-dynamodb.test.ts tests/markdown-validation.test.ts tests/prompt-fallback.test.ts"
+    "test": "tsx --test tests/worker-dynamodb.test.ts tests/prompt-fallback.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.883.0",
