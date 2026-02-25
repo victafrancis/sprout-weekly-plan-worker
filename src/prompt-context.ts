@@ -48,7 +48,7 @@ function buildRuntimeContextSections(input: BuildPromptInput): string {
 
   sections.push('## Output Rules')
   sections.push('- Return markdown only.')
-  sections.push('- Follow the exact required headers from the template.')
+  sections.push('- Follow the planning structure and style guidance from the system prompt.')
   sections.push('- Keep guidance practical, concise, and parent-friendly.')
 
   return sections.join('\n').trim()

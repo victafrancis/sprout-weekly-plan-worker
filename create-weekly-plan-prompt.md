@@ -1,4 +1,4 @@
-Create a Weekly Developmental Plan using the exact structured format below.
+Create a Weekly Developmental Plan using the style and section flow described below.
 
 Child Information (completed based on information about the child):
 - Age (in months):
@@ -10,7 +10,7 @@ Child Information (completed based on information about the child):
 - Parent priority focus (optional):
 
 Plan Requirements:
-- Use the exact same headers and structure as the saved Weekly Developmental Plan template.
+- Follow the same overall section flow as this prompt, but minor header wording variations are allowed.
 - Choose a Primary Schema based on the behaviors described.
 - Optionally include a Secondary Schema if relevant.
 - Write 2–3 observable, measurable goals.
@@ -18,30 +18,38 @@ Plan Requirements:
 - Include a Weekend repeat & extend section.
 - Include Caregiving-as-Learning scripts (at least 2 routines).
 - Include a “What to Observe” section.
-- Include End-of-Week Reflection prompts.
-- Include Next Week Progression guidance.
+- Include an End-of-Week reflection/decision section.
+- Include Next Week progression or decision guidance.
 - Keep activities short (2–10 minutes), flexible, and repetition-friendly.
 - Ensure all activities are developmentally appropriate and safe for the child’s age.
 - Emphasize autonomy, responsive interaction, and repetition.
 - Avoid rigid scheduling — use menu-style options.
 
+Context Usage Rules:
+- Use the provided Runtime Context (profile + recent logs) as the primary source of truth.
+- Use Development Guides as supporting evidence and inspiration.
+- Do not invent concrete child facts that are not present in runtime context.
+- If data is missing, use neutral wording and practical options instead of fabricated details.
+- Ground recommendations in observed interests, sensitivities, and current mobility/communication level.
+
 Output Format:
-Use the following exact headers:
+Preferred section pattern (small wording variations allowed):
 
 # 🌱 Weekly Developmental Plan  
-# 🎯 Weekly Goals (Observable)  
-# 🧺 Weekly Activity Menu (Pick 3–5 per day, repeat favorites)  
-## Monday  
-## Tuesday  
-## Wednesday  
-## Thursday  
-## Friday  
-## Weekend (Repeat & Extend)  
-# 👶 Caregiving-as-Learning Scripts  
-# 🔎 What to Observe This Week  
-# 🔁 End-of-Week Reflection  
-# ➡️ How Next Week Might Progress  
-# 🛟 Safety Reminders
+## 📊 Logic for this Week's Plan (or similar)  
+## 🎯 Weekly Goals (Observable)  
+## 🧺 Weekly Activity Menu (Pick 3–5 per day)  
+### Monday  
+### Tuesday  
+### Wednesday  
+### Thursday  
+### Friday  
+### Weekend (Repeat & Extend)  
+## 👶 Caregiving-as-Learning Scripts  
+## 🔎 What to Observe This Week  
+## 🔁 End-of-Week Reflection / Decision Rules  
+## ➡️ Next Week Progression (optional if covered in decision rules)  
+## 🛟 Safety Reminders (recommended)
 
 Tone:
 - Clear
