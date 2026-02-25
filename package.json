@@ -9,6 +9,7 @@
     "invoke:local": "node -e \"const m=require('./dist/handler.cjs');Promise.resolve(m.handler({requestSource:'manual',requestedAt:new Date().toISOString()})).then(r=>{console.log(JSON.stringify(r,null,2));}).catch(e=>{console.error(e);process.exit(1);});\"",
     "deploy:cli": "scripts\\deploy-lambda.cmd",
     "run:local": "tsx src/local-runner.ts",
+    "generate:local": "npm run run:local",
     "test": "tsx --test tests/worker-dynamodb.test.ts tests/prompt-fallback.test.ts"
   },
   "dependencies": {
