@@ -2,6 +2,50 @@ import type { WorkerConfig } from './worker-types.js'
 
 type EnvironmentMap = NodeJS.ProcessEnv
 
+function readOptionalThinkingLevel(environment: EnvironmentMap): 'low' | 'medium' | 'high' | undefined {
+  const rawValue = environment.OPENROUTER_THINKING_LEVEL
+
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  const normalizedValue = rawValue.trim().toLowerCase()
+
+  if (normalizedValue.length === 0) {
+    return undefined
+  }
+
+  if (normalizedValue === 'low' || normalizedValue === 'medium' || normalizedValue === 'high') {
+    return normalizedValue
+  }
+
+  throw new Error('OPENROUTER_THINKING_LEVEL must be one of: low, medium, high')
+}
+
+function readOptionalReasoningEnabled(environment: EnvironmentMap): boolean | undefined {
+  const rawValue = environment.OPENROUTER_REASONING_ENABLED
+
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  const normalizedValue = rawValue.trim().toLowerCase()
+
+  if (normalizedValue.length === 0) {
+    return undefined
+  }
+
+  if (normalizedValue === 'true') {
+    return true
+  }
+
+  if (normalizedValue === 'false') {
+    return false
+  }
+
+  throw new Error('OPENROUTER_REASONING_ENABLED must be true or false')
+}
+
 function readRequiredEnvironmentValue(environment: EnvironmentMap, variableName: string): string {
   const variableValue = environment[variableName]
 
@@ -30,6 +74,8 @@ export function readWorkerConfig(environment: EnvironmentMap): WorkerConfig {
   const region = readRequiredEnvironmentValue(environment, 'REGION')
   const openRouterApiKey = readRequiredEnvironmentValue(environment, 'OPENROUTER_API_KEY')
   const openRouterModel = readRequiredEnvironmentValue(environment, 'OPENROUTER_MODEL')
+  const openRouterThinkingLevel = readOptionalThinkingLevel(environment)
+  const openRouterReasoningEnabled = readOptionalReasoningEnabled(environment)
   const dynamoDbTable = readRequiredEnvironmentValue(environment, 'DYNAMODB_TABLE')
   const childId = readRequiredEnvironmentValue(environment, 'CHILD_ID')
   const s3Bucket = readRequiredEnvironmentValue(environment, 'S3_BUCKET')
@@ -43,6 +89,8 @@ export function readWorkerConfig(environment: EnvironmentMap): WorkerConfig {
     region,
     openRouterApiKey,
     openRouterModel,
+    openRouterThinkingLevel,
+    openRouterReasoningEnabled,
     dynamoDbTable,
     childId,
     s3Bucket,

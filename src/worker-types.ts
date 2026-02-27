@@ -38,6 +38,8 @@ export type WorkerConfig = {
   region: string
   openRouterApiKey: string
   openRouterModel: string
+  openRouterThinkingLevel?: 'low' | 'medium' | 'high'
+  openRouterReasoningEnabled?: boolean
   dynamoDbTable: string
   childId: string
   s3Bucket: string

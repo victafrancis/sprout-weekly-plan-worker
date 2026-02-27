@@ -65,6 +65,50 @@ function readRequiredEnvironmentVariable(variableName: 'OPENROUTER_API_KEY' | 'O
   return trimmedValue
 }
 
+function readOptionalThinkingLevel(): 'low' | 'medium' | 'high' | undefined {
+  const rawValue = process.env.OPENROUTER_THINKING_LEVEL
+
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  const normalizedValue = rawValue.trim().toLowerCase()
+
+  if (normalizedValue.length === 0) {
+    return undefined
+  }
+
+  if (normalizedValue === 'low' || normalizedValue === 'medium' || normalizedValue === 'high') {
+    return normalizedValue
+  }
+
+  throw new Error('OPENROUTER_THINKING_LEVEL must be one of: low, medium, high')
+}
+
+function readOptionalReasoningEnabled(): boolean | undefined {
+  const rawValue = process.env.OPENROUTER_REASONING_ENABLED
+
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  const normalizedValue = rawValue.trim().toLowerCase()
+
+  if (normalizedValue.length === 0) {
+    return undefined
+  }
+
+  if (normalizedValue === 'true') {
+    return true
+  }
+
+  if (normalizedValue === 'false') {
+    return false
+  }
+
+  throw new Error('OPENROUTER_REASONING_ENABLED must be true or false')
+}
+
 function buildOutputFilePath(nowIso: string): string {
   const outputDirectory = resolve(process.cwd(), 'output', 'local-plans')
   mkdirSync(outputDirectory, { recursive: true })
@@ -78,6 +122,8 @@ async function runLocalFixtureFlow(): Promise<void> {
 
   const openRouterApiKey = readRequiredEnvironmentVariable('OPENROUTER_API_KEY')
   const openRouterModel = readRequiredEnvironmentVariable('OPENROUTER_MODEL')
+  const openRouterThinkingLevel = readOptionalThinkingLevel()
+  const openRouterReasoningEnabled = readOptionalReasoningEnabled()
   const nowIso = new Date().toISOString()
   const fixtureProfile = mockChildProfileItem as ChildProfileItem
   const fixtureLogs = mockDailyLogItems as DailyLogItem[]
@@ -116,6 +162,8 @@ async function runLocalFixtureFlow(): Promise<void> {
     model: openRouterModel,
     systemPrompt: promptMessages.systemPrompt,
     userPrompt: promptMessages.userPrompt,
+    thinkingLevel: openRouterThinkingLevel,
+    reasoningEnabled: openRouterReasoningEnabled,
   })
 
   const outputFilePath = buildOutputFilePath(nowIso)

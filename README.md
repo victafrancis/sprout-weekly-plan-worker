@@ -75,10 +75,19 @@ set S3_BUCKET=sprout-knowledge-base
 set CHILD_ID=Bambam
 set OPENROUTER_MODEL=google/gemini-3.1-pro-preview
 set OPENROUTER_API_KEY=<your-openrouter-api-key>
+set OPENROUTER_THINKING_LEVEL=medium
+set OPENROUTER_REASONING_ENABLED=true
 set S3_PROMPT_KEY=prompts/create-weekly-plan-prompt.md
 set S3_DEVELOPMENT_GUIDES_PREFIX=development_guides/
 set S3_WEEKLY_PLANS_PREFIX=plans/
 ```
+
+Optional OpenRouter tuning variables:
+
+- `OPENROUTER_THINKING_LEVEL`: `low`, `medium`, or `high`
+- `OPENROUTER_REASONING_ENABLED`: `true` or `false`
+
+These are optional. When set, the worker includes both fields in the OpenRouter request body for any configured model. This keeps model switching as a configuration-only change.
 
 ### 2) Deploy with AWS CLI
 

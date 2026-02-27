@@ -76,6 +76,8 @@ export const handler: Handler<WorkerInputEvent, WorkerOutput> = async (event) =>
       model: config.openRouterModel,
       systemPrompt: modelPromptMessages.systemPrompt,
       userPrompt: modelPromptMessages.userPrompt,
+      thinkingLevel: config.openRouterThinkingLevel,
+      reasoningEnabled: config.openRouterReasoningEnabled,
     })
 
     const outputObjectKey = await writeWeeklyPlanArtifact({

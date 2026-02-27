@@ -3,6 +3,8 @@ type GenerateInput = {
   model: string
   systemPrompt: string
   userPrompt: string
+  thinkingLevel?: 'low' | 'medium' | 'high'
+  reasoningEnabled?: boolean
 }
 
 type OpenRouterResponse = {
@@ -42,26 +44,38 @@ function extractTextFromModelContent(content: OpenRouterMessageContent): string 
 }
 
 export async function generateWeeklyPlanMarkdown(input: GenerateInput): Promise<string> {
+  const requestBody: Record<string, unknown> = {
+    model: input.model,
+    temperature: 0.2,
+    messages: [
+      {
+        role: 'system',
+        content: input.systemPrompt,
+      },
+      {
+        role: 'user',
+        content: input.userPrompt,
+      },
+    ],
+  }
+
+  if (input.thinkingLevel !== undefined) {
+    requestBody.thinking_level = input.thinkingLevel
+  }
+
+  if (input.reasoningEnabled !== undefined) {
+    requestBody.reasoning = {
+      enabled: input.reasoningEnabled,
+    }
+  }
+
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${input.apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: input.model,
-      temperature: 0.2,
-      messages: [
-        {
-          role: 'system',
-          content: input.systemPrompt,
-        },
-        {
-          role: 'user',
-          content: input.userPrompt,
-        },
-      ],
-    }),
+    body: JSON.stringify(requestBody),
   })
 
   if (!response.ok) {
